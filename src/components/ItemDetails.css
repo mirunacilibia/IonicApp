@@ -1,0 +1,34 @@
+
+.details-card {
+  background-color: #FFFFE8;
+  border-radius: 20px;
+  color: black !important;
+  font-family: "Courier New", serif !important;
+}
+
+.details-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.array-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #CDE990;
+  border-style: solid;
+  border-radius: 20px;
+  border-color: #AACB73;
+  padding: 10px;
+}
+
+.text {
+  color: black !important;
+  font-size: 40px !important;
+}
+
+h4 {
+  margin-bottom: 10px !important;
+  font-size: 25px !important;
+}

@@ -21,21 +21,25 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import {ItemProvider} from "./components/ItemProvider";
+import ItemEdit from "./components/ItemEdit";
 
 setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
+    <ItemProvider>
     <IonReactRouter>
       <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
-        </Route>
+          <Route exact path="/items" component={Home}/>
+          <Route exact path="/item/:id" component={ItemEdit}/>
+          <Route exact path="/item" component={ItemEdit}/>
         <Route exact path="/">
-          <Redirect to="/home" />
+          <Redirect to="/items" />
         </Route>
       </IonRouterOutlet>
     </IonReactRouter>
+      </ItemProvider>
   </IonApp>
 );
 
