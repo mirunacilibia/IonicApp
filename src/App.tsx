@@ -23,9 +23,12 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import {ItemProvider} from "./components/ItemProvider";
 import ItemEdit from "./components/ItemEdit";
+import {AuthProvider, Login, PrivateRoute} from "./auth";
+import React from "react";
 
 setupIonicReact();
 
+//TODO: Select which app type you need: with or without auth
 const App: React.FC = () => (
   <IonApp>
     <ItemProvider>
@@ -42,5 +45,27 @@ const App: React.FC = () => (
       </ItemProvider>
   </IonApp>
 );
+
+//TODO: Select which app type you need: with or without auth
+// const App: React.FC = () => (
+//     <IonApp>
+//         <IonReactRouter>
+//             <IonRouterOutlet>
+//                 <AuthProvider>
+//                     <Route path="/login" component={Login} exact={true} />
+//                     <ItemProvider>
+//                         {/*@ts-ignore*/}
+//                         <PrivateRoute path="/items" component={Home} exact={true} />
+//                         {/* @ts-ignore*/}
+//                         <PrivateRoute path="/item" component={ItemEdit} exact={true} />
+//                         {/*@ts-ignore*/}
+//                         <PrivateRoute path="/item/:id" component={ItemEdit} exact={true} />
+//                     </ItemProvider>
+//                     <Route exact path="/" render={() => <Redirect to="/items" />} />
+//                 </AuthProvider>
+//             </IonRouterOutlet>
+//         </IonReactRouter>
+//     </IonApp>
+// );
 
 export default App;

@@ -1,4 +1,5 @@
 import {
+    IonButton,
     IonContent,
     IonFab,
     IonFabButton,
@@ -16,7 +17,9 @@ import {getLogger} from "../core";
 import {useContext} from "react";
 import {ItemContext} from "../components/ItemProvider";
 import {RouteComponentProps} from "react-router";
-import {add} from "ionicons/icons";
+import {add, logOut} from "ionicons/icons";
+import {AuthContext} from "../auth";
+import {Redirect} from "react-router-dom";
 
 const log = getLogger('ItemList');
 
@@ -24,12 +27,25 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
 
     const { items, fetching, fetchingError } = useContext(ItemContext);
 
+    //TODO: Remove if not auth
+    const { logout } = useContext(AuthContext);
+    const handleLogout = () => {
+        logout?.();
+        return <Redirect to={{pathname: "/login"}} />;
+    }
+
     log('render');
 
   return (
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar >
+            {/*//TODO: Remove if not auth*/}
+            <IonFab vertical="top" horizontal="end" style={{"height": "70px"}}>
+                <IonFabButton onClick={() => handleLogout()} color="light">
+                    <IonIcon icon={logOut} />
+                </IonFabButton>
+            </IonFab>
           <IonTitle className="header">ItemsList</IonTitle>
         </IonToolbar>
       </IonHeader>
