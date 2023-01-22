@@ -1,5 +1,5 @@
 import './ItemDetails.css'
-import React, {useCallback, useEffect} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {
     createAnimation, IonButton,
     IonCard,
@@ -12,20 +12,43 @@ import {
     IonLabel, IonRow
 } from "@ionic/react";
 import { Dropdown, ItemProps } from "../item/ItemProps";
-import {trash} from "ionicons/icons";
+import {infinite, trash} from "ionicons/icons";
+import {moon} from "ionicons/icons";
+import ItemEdit from "./ItemEdit";
+import ItemEditSamePage from "./ItemEditSamePage";
 
 interface ItemPropsExt {
     item: ItemProps;
     onEdit: (_id?: string) => void;
+    // history:
 }
 
 const ItemDetails: React.FC<ItemPropsExt> = ({ item, onEdit }) => {
     const handleEdit = useCallback(() => onEdit(item.id), [item.id, onEdit]);
 
+    const [showMore, setShowMore] = useState(false);
+
+    //TODO: change/delete based on requirements
+    useEffect(() => {
+        const el = document.querySelector('.bold');
+        if (el) {
+            const animation = createAnimation()
+                .addElement(el)
+                .duration(1000)
+                .direction('alternate')
+                .iterations(1)
+                .keyframes([
+                    {fontWeight: 'bold'},
+                    {fontWeight: 'normal'},
+                ]);
+            animation.play();
+            }
+    }, [item]);
+
     return (
         <IonCard className="details-card">
         <IonCardHeader>
-            <IonCardTitle><h1 className="text">{item.stringValue}</h1></IonCardTitle>
+            <IonCardTitle><h1 style={{ color: "black", fontSize: "40px"}} className={`${item.booleanValue ? "bold" : ""}`}>{item.stringValue}</h1></IonCardTitle>
         </IonCardHeader>
     <IonCardContent onClick={handleEdit} id={item.id}>
     <IonGrid>
@@ -45,7 +68,15 @@ const ItemDetails: React.FC<ItemPropsExt> = ({ item, onEdit }) => {
     </IonRow>
     </IonGrid>
     </IonCardContent>
-    <IonButton style={{ marginLeft: "20px", marginBottom: "30px" }} color={"light"} onClick={() => {}}> <IonIcon icon={trash} /> </IonButton>
+            <IonRow>
+                <IonButton style={{ marginLeft: "20px", marginBottom: "30px" }} color={"light"} onClick={() => {}}> <IonIcon icon={trash} /> </IonButton>
+                <IonButton style={{ marginLeft: "20px", marginBottom: "30px" }} color={"light"} onClick={() => {
+                    setShowMore(!showMore);
+                }}> <IonIcon icon={moon} /> </IonButton>
+            </IonRow>
+                {showMore &&
+                    <ItemEditSamePage item={item}/>
+                }
     </IonCard>
 );
 };

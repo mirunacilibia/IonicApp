@@ -1,0 +1,13 @@
+
+
+ion-item::part(native) {
+    background: #FFFFE8;
+    color: black;
+    font-family: "Courier New", serif !important;
+    font-size: 25px !important;
+}
+
+ion-item::part(detail-icon) {
+    font-family: "Courier New", serif !important;
+    font-size: 25px !important;
+}
