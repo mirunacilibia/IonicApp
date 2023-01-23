@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { getLogger } from '../core';
-import { ItemProps } from '../item/ItemProps';
+import {Dropdown, ItemProps} from '../item/ItemProps';
 import { createItem, getItems, newWebSocket, updateItem } from './ItemApi';
+import {Network} from "@capacitor/network";
+import {Preferences } from "@capacitor/preferences" ;
 
 const log = getLogger('ItemProvider');
 
@@ -26,6 +28,13 @@ const initialState: ItemsState = {
     fetching: false,
     saving: false,
 };
+
+//TODO: delete if not necessary
+let isConnected = true;
+Network.addListener("networkStatusChange", status => {
+    isConnected = status.connected;
+})
+const Storage = Preferences;
 
 const FETCH_ITEMS_STARTED = 'FETCH_ITEMS_STARTED';
 const FETCH_ITEMS_SUCCEEDED = 'FETCH_ITEMS_SUCCEEDED';
@@ -91,12 +100,64 @@ export const ItemProvider: React.FC<ItemProviderProps> = ({ children }) => {
 
         async function fetchItems() {
             try {
-                log('fetchItems started');
-                dispatch({ type: FETCH_ITEMS_STARTED });
-                const items = await getItems();
-                log('fetchItems succeeded');
-                if (!canceled) {
-                    dispatch({ type: FETCH_ITEMS_SUCCEEDED, payload: { items } });
+                // TODO: if not local storage
+                // log('fetchItems started');
+                // dispatch({ type: FETCH_ITEMS_STARTED });
+                // const items = await getItems();
+                // log('fetchItems succeeded');
+                // if (!canceled) {
+                //     dispatch({ type: FETCH_ITEMS_SUCCEEDED, payload: { items } });
+                // }
+                //TODO: local storage
+                if(isConnected) {
+                    try {
+                        log('fetchItems started');
+                        dispatch({ type: FETCH_ITEMS_STARTED });
+
+                        const { keys } = await Storage.keys();
+                        for(let i = 0; i < keys.length; i ++)
+                            if(keys[i] !== 'token'){
+                                const ret = await Storage.get({key: keys[i]});
+                                const result = JSON.parse(ret.value || '{}');
+                                result._id = keys[i].split("_")[1];
+                                log(result);
+                                await saveItem(result);
+                                await Storage.remove({key: keys[i]});
+                            }
+
+                        const items = await getItems();
+                        log('fetchItems succeeded');
+                        if (!canceled) {
+                            dispatch({ type: FETCH_ITEMS_SUCCEEDED, payload: { items } });
+                        }
+                    } catch (error) {
+                        log('fetchItems failed');
+                        dispatch({ type: FETCH_ITEMS_FAILED, payload: { error } });
+                    }
+                }
+                else {
+                    try {
+                        log('fetchItems started');
+                        dispatch({ type: FETCH_ITEMS_STARTED });
+
+                        const { keys } = await Storage.keys();
+                        let allItems = []
+                        for(let i = 0; i < keys.length; i ++)
+                            if(keys[i] !== 'token'){
+                                const ret = await Storage.get({key: keys[i]});
+                                const result = JSON.parse(ret.value || '{}');
+                                allItems.push(result)
+                            }
+
+                        const items = allItems;
+                        log('fetchItems succeeded');
+                        if (!canceled) {
+                            dispatch({ type: FETCH_ITEMS_SUCCEEDED, payload: { items } });
+                        }
+                    } catch (error) {
+                        log('fetchItems failed');
+                        dispatch({ type: FETCH_ITEMS_FAILED, payload: { error } });
+                    }
                 }
             } catch (error) {
                 log('fetchItems failed');
@@ -106,15 +167,55 @@ export const ItemProvider: React.FC<ItemProviderProps> = ({ children }) => {
     }
 
     async function saveItemCallback(item: ItemProps) {
-        try {
-            log('saveItem started');
-            dispatch({ type: SAVE_ITEM_STARTED });
-            const savedItem = await (item.id ? updateItem(item) : createItem(item));
-            log('saveItem succeeded');
-            dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item: savedItem } });
-        } catch (error) {
-            log('saveItem failed');
-            dispatch({ type: SAVE_ITEM_FAILED, payload: { error } });
+        // TODO: if not local storage
+        // try {
+        //     log('saveItem started');
+        //     dispatch({ type: SAVE_ITEM_STARTED });
+        //     const savedItem = await (item.id ? updateItem(item) : createItem(item));
+        //     log('saveItem succeeded');
+        //     dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item: savedItem } });
+        // } catch (error) {
+        //     log('saveItem failed');
+        //     dispatch({ type: SAVE_ITEM_FAILED, payload: { error } });
+        // }
+
+        //TODO: local storage
+        if(isConnected) {
+            try {
+                log('saveItem started');
+                dispatch({ type: SAVE_ITEM_STARTED });
+                const savedItem = await (item.id ? updateItem(item) : createItem(item));
+                log('saveItem succeeded');
+                dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item: savedItem } });
+            } catch (error) {
+                log('saveItem failed');
+                dispatch({ type: SAVE_ITEM_FAILED, payload: { error } });
+            }
+        } else {
+            try {
+                log('saveItem started');
+                dispatch({ type: SAVE_ITEM_STARTED });
+
+                await Storage.set({
+                    key: "item_" + item.id,
+                    value: JSON.stringify({
+                        stringValue: item.stringValue,
+                        date: item.date,
+                        booleanValue: item.booleanValue,
+                        dropdownValue: item.dropdownValue,
+                        arrayValue: item.arrayValue,
+                        numberValue: item.numberValue,
+                    })
+                });
+
+                alert("You are offline. This action will be done when the server is up");
+
+                log('saveItem succeeded');
+                dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item: item } });
+            } catch (error) {
+                log('saveItem failed');
+                dispatch({ type: SAVE_ITEM_FAILED, payload: { error } });
+            }
         }
     }
 

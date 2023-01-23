@@ -1,4 +1,5 @@
 import {
+    IonBadge,
     IonButton,
     IonContent,
     IonFab,
@@ -20,13 +21,25 @@ import {RouteComponentProps} from "react-router";
 import {add, logOut} from "ionicons/icons";
 import {AuthContext} from "../auth";
 import {Redirect} from "react-router-dom";
+import { Network } from '@capacitor/network';
 import ItemEdit from "../components/ItemEdit";
+
+let isConnectedInitially = true;
+Network.addListener("networkStatusChange", status => {
+	isConnectedInitially = status.connected;
+})
 
 const log = getLogger('ItemList');
 
 const Home: React.FC<RouteComponentProps> = ({ history }) => {
 
     const { items, fetching, fetchingError } = useContext(ItemContext);
+
+    //TODO: delete if not necessary
+    const [isConnected, setIsConnected] = useState<boolean>(isConnectedInitially)
+    Network.addListener("networkStatusChange", status => {
+        setIsConnected(status.connected);
+    })
 
     //TODO: Update/Delete based on requirements
     const pageSize = 3;
@@ -103,6 +116,8 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
       <IonHeader translucent={true}>
         <IonToolbar>
           <IonTitle className="header">ItemsList</IonTitle>
+            {/*TODO: delete if not necessary*/}
+            <IonBadge className="status-badge" color = { isConnected ? "primary" : "danger" }>Network status: { isConnected ? "Online" : "Offline" }</IonBadge>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
