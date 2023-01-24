@@ -8,6 +8,15 @@ export const getItems: (token: string) => Promise<ItemProps[]> = token => {
     return withLogs(axios.get(itemUrl, authConfig(token)), 'getItems');
 }
 
+//TODO: maybe add item here if we want it to load?
+export const getItem: (token: string, id: number) => Promise<ItemProps> = (token, id) => {
+    return withLogs(axios.get(`${itemUrl}/${id}`, authConfig(token)), 'getItem');
+}
+
+export const removeItem: (token: string, id: number) => Promise<ItemProps> = (token, id) => {
+    return withLogs(axios.delete(`${itemUrl}/${id}`, authConfig(token)), 'removeItem');
+}
+
 export const createItem: (token: string, item: ItemProps) => Promise<ItemProps[]> = (token, item) => {
     return withLogs(axios.post(itemUrl, item, authConfig(token)), 'createItem');
 }

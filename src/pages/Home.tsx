@@ -1,6 +1,6 @@
 import {
     IonBadge,
-    IonButton,
+    IonButton, IonButtons,
     IonContent,
     IonFab,
     IonFabButton,
@@ -15,7 +15,7 @@ import './Home.css';
 import {Dropdown, ItemProps} from "../item/ItemProps";
 import ItemDetails from "../components/ItemDetails";
 import {getLogger} from "../core";
-import {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {ItemContext} from "../components/ItemProvider";
 import {RouteComponentProps} from "react-router";
 import {add, logOut} from "ionicons/icons";
@@ -33,7 +33,7 @@ const log = getLogger('ItemList');
 
 const Home: React.FC<RouteComponentProps> = ({ history }) => {
 
-    const { items, fetching, fetchingError } = useContext(ItemContext);
+    const { items, fetching, fetchingError, fetchItem, rerender, setRerender } = useContext(ItemContext);
 
     //TODO: delete if not necessary
     const [isConnected, setIsConnected] = useState<boolean>(isConnectedInitially)
@@ -49,19 +49,28 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
     const [position, setPosition] = useState<number>(pageSize);
     const [filteredItems, setFilteredItems] = useState<ItemProps[]>([]);
 
+    const getOne = () => {
+        fetchItem && fetchItem(3).then(response => {
+            console.log(response)
+            response && console.log(response);
+        });
+    };
+
     useEffect(() =>{
-        if(items?.length){
+        if(items?.length || fetchingError){
             // sort function
-            const sortedArray: ItemProps[] = items.sort((n1,n2) => {
-                if (n1.date > n2.date) {
-                    return 1;
-                }
-                if (n1.date < n2.date) {
-                    return -1;
-                }
-                return 0;
-            });
-            setFilteredItems(sortedArray.slice(0, position));
+            if(items && items.length > 0) {
+                const sortedArray: ItemProps[] = items.sort((n1, n2) => {
+                    if (n1.date > n2.date) {
+                        return 1;
+                    }
+                    if (n1.date < n2.date) {
+                        return -1;
+                    }
+                    return 0;
+                });
+                setFilteredItems(sortedArray.slice(0, position));
+            }
         }
     }, [items]);
 
@@ -73,7 +82,9 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
         if(items && search){
             log("search");
             setPosition(items.length);
-            setFilteredItems(items.filter((item: ItemProps) => item.stringValue.startsWith(search)));
+            setTimeout(() => {
+                setFilteredItems(items.filter((item: ItemProps) => item.stringValue.startsWith(search)));
+            }, 2000);
         }
     }, [search]);
 
@@ -99,13 +110,19 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
     //TODO: Remove if not auth
     const { logout } = useContext(AuthContext);
     const handleLogout = () => {
-        logout?.();
-        return <Redirect to={{pathname: "/login"}} />;
+        // logout?.();
+        // return <Redirect to={{pathname: "/login"}} />;
+        getOne();
     }
 
     log('render');
 
-  return (
+    const retryLoadItems = () => {
+        setRerender && setRerender(!rerender);
+    };
+
+
+    return (
     <IonPage>
         {/*//TODO: Remove if not auth*/}
         <IonFab vertical="top" horizontal="end" style={{"height": "20px"}}>
@@ -154,7 +171,10 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
               </IonInfiniteScrollContent>
           </IonInfiniteScroll>
           {fetchingError && (
-              <div>{fetchingError.message || 'Failed to fetch items'}</div>
+              <div>
+                    {fetchingError.message || 'Failed to fetch items'}
+                    <IonButton onClick={retryLoadItems}>Retry</IonButton>
+              </div>
           )}
           <IonFab vertical="bottom" horizontal="end" slot="fixed">
               <IonFabButton onClick={() => history.push("/item")} color="light">

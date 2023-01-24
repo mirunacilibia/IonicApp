@@ -6,7 +6,7 @@ export enum Dropdown {
 }
 
 export interface ItemProps {
-    id?: string;
+    id?: number;
     stringValue: string;
     date: Date;
     booleanValue: boolean;

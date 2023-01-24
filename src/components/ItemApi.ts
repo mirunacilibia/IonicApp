@@ -35,6 +35,14 @@ export const getItems: () => Promise<ItemProps[]> = () => {
     return withLogs(axios.get(itemUrl, config), 'getItems');
 }
 
+export const getItem: (id: number) => Promise<ItemProps> = (id) => {
+    return withLogs(axios.get(`${itemUrl}/${id}`, config), 'getItem');
+}
+
+export const removeItem: (id: number) => Promise<ItemProps> = (id) => {
+    return withLogs(axios.delete(`${itemUrl}/${id}`, config), 'removeItem');
+}
+
 export const createItem: (item: ItemProps) => Promise<ItemProps[]> = item => {
     return withLogs(axios.post(itemUrl, item, config), 'createItem');
 }

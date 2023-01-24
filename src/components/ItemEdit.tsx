@@ -30,7 +30,7 @@ interface ItemEditProps
     }> {}
 
 const ItemAddEdit: React.FC<ItemEditProps> = ({ history, match }) => {
-    const { items, saving, savingError, saveItem } = useContext(ItemContext);
+    const { items, saving, savingError, saveItem, fetching, fetchingError, fetchItem } = useContext(ItemContext);
     const [stringValue, setStringValue] = useState("");
     const [date, setDate] = useState(new Date());
     const [booleanValue, setBooleanValue] = useState(true);
@@ -38,26 +38,12 @@ const ItemAddEdit: React.FC<ItemEditProps> = ({ history, match }) => {
     const [numberValue, setNumberValue] = useState<number>(0);
     const [arrayValue, setArrayValue] = useState<Array<string>>(new Array<string>(""));
     const [item, setItem] = useState<ItemProps>();
+    const [retry, setRetry] = useState<boolean>(false);
 
-    // function for saving a new item - only for add
-    // const handleSave = useCallback(() => {
-    // 	const newItem = { stringValue, date, booleanValue, dropdownValue, numberValue };
-    // 	// saveItem && saveItem(newItem).then(() => history.goBack());
-    // }, [
-    // 	item,
-    // 	saveItem,
-    // 	stringValue,
-    // 	date,
-    // 	booleanValue,
-    // 	dropdownValue,
-    // 	numberValue,
-    // 	history,
-    // ]);
-
-    // load item details if edit
+    //TODO: load item details if edit
     useEffect(() => {
         log("useEffect");
-        const routeId = match.params.id || "";
+        const routeId = parseInt(match.params.id || '-1');
         const item = items?.find((it) => it.id === routeId);
         setItem(item);
         if (item) {
@@ -70,12 +56,20 @@ const ItemAddEdit: React.FC<ItemEditProps> = ({ history, match }) => {
         }
     }, [match.params.id, items]);
 
+    //TODO: fetch one item
+    // useEffect(() => {
+    //     fetchItem && fetchItem(3).then(response => {
+    //         console.log(response)
+    //         response && console.log(response);
+    //     });
+    // }, [fetchItem, item]);
+
     // function for edit
     const handleSave = useCallback(() => {
         const editedItem = item
             ? { ...item, stringValue, date, booleanValue, dropdownValue, numberValue, arrayValue }
             : { stringValue, date, booleanValue, dropdownValue, numberValue, arrayValue };
-        saveItem && saveItem(editedItem).then(() => history.goBack());
+        saveItem && saveItem(editedItem).then(r => history.goBack());
     }, [
         item,
         saveItem,
